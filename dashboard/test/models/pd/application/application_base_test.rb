@@ -259,6 +259,25 @@ module Pd::Application
       assert_not_nil email.sent_at
     end
 
+    test 'record lock state change with user' do
+      application = create TEACHER_APPLICATION_FACTORY
+      workshop_admin = create :workshop_admin
+      application.lock!
+      application.update_lock_timestamp_change_log(workshop_admin)
+
+      expected_entry = {
+        title: true,
+        changing_user_id: workshop_admin.id,
+        changing_user_name: workshop_admin.name,
+        time: Time.now
+      }
+
+      assert_equal(
+        [expected_entry],
+        (application.sanitize_status_timestamp_change_log)
+      )
+    end
+
     test 'record status change with user' do
       application = create TEACHER_APPLICATION_FACTORY
       workshop_admin = create :workshop_admin

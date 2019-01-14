@@ -329,6 +329,50 @@ module Api::V1::Pd
       assert_equal [], @csd_teacher_application_with_partner.sanitize_status_timestamp_change_log
     end
 
+    test 'update appends to timestamp log if lock state is changed and user is workshop admin' do
+      sign_in @workshop_admin
+
+      # test locking application
+      @csp_facilitator_application.update(status_timestamp_change_log: '[]')
+      @csp_facilitator_application.reload
+
+      assert_equal [], @csp_facilitator_application.sanitize_status_timestamp_change_log
+
+      post :update, params: {id: @csp_facilitator_application.id, application: {status: @csp_facilitator_application.status, locked: 'true'}}
+      @csp_facilitator_application.reload
+
+      assert_equal [
+        {
+          title: 'Application is locked',
+          changing_user_id: @workshop_admin.id,
+          changing_user_name: @workshop_admin.name,
+          time: Time.zone.now
+        }
+      ], @csp_facilitator_application.sanitize_status_timestamp_change_log
+      puts 'done first part'
+
+      #@csp_facilitator_application.unlock!
+      @csp_facilitator_application.update!(status_timestamp_change_log: '[]', locked_at: nil)
+      p @csp_facilitator_application.errors
+      @csp_facilitator_application.reload
+
+      assert_equal [], @csp_facilitator_application.sanitize_status_timestamp_change_log
+      assert_equal false, @csp_facilitator_application.locked?
+
+      post :update, params: {id: @csp_facilitator_application.id, application: {status: @csp_facilitator_application.status, locked: false}}
+      @csp_facilitator_application.reload
+
+      assert_equal [], @csp_facilitator_application.sanitize_status_timestamp_change_log
+    end
+
+    #test 'update does not append to timestamp log if lock state is unchange' do
+    # test unlocking application
+    #  sign_in @workshop_admin
+    #end
+    #test 'update does not append to timestamp log if user is not workshop admin' do
+    # todo: TBA
+    #end
+
     test 'workshop admins can lock and unlock applications' do
       sign_in @workshop_admin
       put :update, params: {id: @csf_facilitator_application_no_partner, application: {status: 'accepted', locked: 'true'}}

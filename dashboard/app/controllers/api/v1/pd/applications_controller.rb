@@ -194,9 +194,16 @@ module Api::V1::Pd
 
       # only allow those with full management permission to lock/unlock and edit form data
       if current_user.workshop_admin?
+        p "appplication.locked? = #{@application.locked?}"
+        p "application_admin_params[:locked] = #{application_admin_params[:locked]}"
+
         if current_user.workshop_admin? && application_admin_params.key?(:locked)
           # only current facilitator applications can be locked/unlocked
           if @application.application_type == FACILITATOR_APPLICATION
+            if application_admin_params[:locked] != @application.locked?
+              lock_changed = true
+            end
+
             application_admin_params[:locked] ? @application.lock! : @application.unlock!
           end
         end
@@ -209,6 +216,7 @@ module Api::V1::Pd
       end
 
       @application.update_status_timestamp_change_log(current_user) if status_changed
+      @application.update_lock_change_log(current_user) if lock_changed
 
       render json: @application, serializer: ApplicationSerializer
     end
