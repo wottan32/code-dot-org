@@ -24,7 +24,7 @@ class SecretsTest < Minitest::Test
     assert_equal 'test123', secrets.test
     assert_nil secrets.get('test2').value
 
-    # GetSecretValue on last path-prefix if multiple paths contain a value.
+    # GetSecretValue on first path-prefix if multiple paths contain a value.
     assert_equal 'env/cdo/test', client.api_requests.detect {|req| req[:operation_name] == :get_secret_value}[:params][:secret_id]
 
     # Ensure API calls to GetSecretValue are cached.
