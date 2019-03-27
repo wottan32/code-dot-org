@@ -11,7 +11,9 @@ class SecretsTest < Minitest::Test
     client = Aws::SecretsManager::Client.new(
       stub_responses: {
         get_secret_value: ->(ctx) do
-          {secret_string: values[ctx.params[:secret_id]]}
+          id = ctx.params[:secret_id]
+          raise Cdo::Secrets::NOT_FOUND.new(nil, '') unless (value = values[id])
+          {secret_string: value}
         end
       }
     )
@@ -28,12 +30,18 @@ class SecretsTest < Minitest::Test
     assert_equal 'env/cdo/test', client.api_requests.detect {|req| req[:operation_name] == :get_secret_value}[:params][:secret_id]
 
     # Ensure API calls to GetSecretValue are cached.
-    assert_equal 2, client.api_requests.count {|req| req[:operation_name] == :get_secret_value}
+    assert_equal 3, client.api_requests.count {|req| req[:operation_name] == :get_secret_value}
 
     assert_equal 'test456', secrets.get('shared/cdo/test').value
 
     # Property-method lookup chain on JSON secret value.
     assert_equal 'my_value', secrets.json.my_key
-    assert_equal 4, client.api_requests.count {|req| req[:operation_name] == :get_secret_value}
+    assert_equal 5, client.api_requests.count {|req| req[:operation_name] == :get_secret_value}
+
+    secrets.required('missing_key')
+    e = assert_raises(Cdo::Secrets::NOT_FOUND) do
+      secrets.required!
+    end
+    assert_match /Key: missing_key/, e.message
   end
 end

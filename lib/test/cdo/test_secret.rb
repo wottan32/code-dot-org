@@ -13,7 +13,7 @@ class SecretTest < Minitest::Test
       stub_responses: {
         get_secret_value: ->(ctx) do
           id = ctx.params[:secret_id]
-          raise Cdo::Secrets::NOT_FOUND.new(nil, nil) unless (value = values[id])
+          raise Cdo::Secrets::NOT_FOUND.new(nil, '') unless (value = values[id])
           {secret_string: value}
         end
       }
@@ -35,8 +35,8 @@ secret2: !Secret z
 # Fetch fully-qualified `x/y/z`.
 secret3: !Secret x/y/z
 
-# Fetch `not_found`, or `'not a secret!'` if not found.
-secret4: !Secret [not_found, 'not a secret!']
+# Fetch `missing_key`, or `'not a secret!'` if not found.
+secret4: !Secret [missing_key, 'not a secret!']
 
 # Fetch fully-qualified `x/y/z`, or `'not a secret!'` if not found.
 secret5: !Secret [x/y/z, 'not a secret!']
@@ -51,6 +51,13 @@ YAML
 
     assert_equal 'testz', secrets_config['secret2']
     assert_equal 3, api_requests(client)
+
+    e = assert_raises(Cdo::Secrets::NOT_FOUND) do
+      secrets.required!
+    end
+    assert_match /Key: missing_key/, e.message
+
+    assert_equal 6, api_requests(client)
 
     assert_equal 'testxyz', secrets_config['secret3']
     assert_equal 'not a secret!', secrets_config['secret4']
