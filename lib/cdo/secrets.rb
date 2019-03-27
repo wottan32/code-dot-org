@@ -61,35 +61,15 @@ module Cdo
     # @return [Concurrent::Promises::Future<String>] Resolved value
     def get(key)
       key = key.to_s
+      # If key includes `/`, get secret directly without searching paths.
+      paths = key.include?('/') ? [nil] : @paths.dup
+
       @values[key] ||= begin
-        # If key includes `/`, get secret directly without searching paths.
-        paths = key.include?('/') ? [nil] : @paths
-        client.then do |c|
-          # Call GetSecretValue within each path, returning the first result.
-          start = Concurrent::Promises.rejected_future(nil, @pool)
-          paths.inject(start) do |promise, path|
-            promise.rescue do |e|
-              raise e unless e.nil? || e.is_a?(NOT_FOUND)
-              c.get_secret_value(
-                secret_id: "#{path}#{key}",
-                version_stage: CURRENT
-              ).secret_string
-            end
-          end
-        end.flat.rescue do |e| # rubocop:disable Style/MultilineBlockChain
-          if e.is_a?(NOT_FOUND)
-            e = NOT_FOUND.new(nil, "Secret not found: #{key}")
-            e.set_backtrace []
-          else
-            e.message << " Key: #{key}"
-          end
-          raise e
-        end.then do |value| # rubocop:disable Style/MultilineBlockChain
-          # If Secret is JSON, parse and wrap in ActiveSupport::OrderedOptions so
-          # property-method lookup chains are possible (e.g., secrets.secret.key).
-          ActiveSupport::OrderedOptions[JSON.parse(value).symbolize_keys]
-        rescue JSON::ParserError, TypeError
-          value
+        client.then do |client|
+          parse_json(get_secret_value(client, key, paths))
+        rescue => e
+          e.message << " Key: #{key}"
+          raise
         end
       end
     end
@@ -124,6 +104,35 @@ module Cdo
     # Ensure cached instance-variable values don't end up in any logs.
     def inspect
       self.class.to_s
+    end
+
+    private
+
+    # Call GetSecretValue for each path, returning the first found result.
+    # @param client[Aws::SecretsManager::Client]
+    # @param key[String]
+    # @param paths[Array<String>]
+    # @return [String]
+    def get_secret_value(client, key, paths)
+      path = paths.shift
+      client.get_secret_value(
+        secret_id: "#{path}#{key}",
+        version_stage: CURRENT
+      ).secret_string
+    rescue NOT_FOUND => e
+      retry unless paths.empty?
+      e.set_backtrace []
+      raise
+    end
+
+    # If +value+ is JSON, parse and wrap in ActiveSupport::OrderedOptions so
+    # property-method lookup chains are possible (e.g., secrets.secret.key).
+    # @param value[String]
+    # @return [ActiveSupport::OrderedOptions|String]
+    def parse_json(value)
+      ActiveSupport::OrderedOptions[JSON.parse(value).symbolize_keys]
+    rescue JSON::ParserError, TypeError
+      value
     end
   end
 end
