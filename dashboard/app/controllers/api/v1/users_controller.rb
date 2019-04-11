@@ -15,13 +15,8 @@ class Api::V1::UsersController < Api::V1::JsonApiController
   # GET /api/v1/users/<user_id>/school_name
   def get_school_name
     render json: {
-      school_name: current_user&.school
+      school_name: current_user&.school&.school_name
     }
-  end
-
-  # PATCH /api/vi/users/<user_id>/update_user_info
-  def update_user_info
-    current_user&.last_seen_school_info_interstitial = DateTime.now
   end
 
   # GET /api/v1/users/<user_id>/contact_details
