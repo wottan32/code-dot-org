@@ -626,7 +626,9 @@ Dashboard::Application.routes.draw do
     end
   end
 
+  # why are we doing this?? REMOVE COMMENT
   get '/dashboardapi/v1/users/:user_id/contact_details', to: 'api/v1/users#get_contact_details'
+  get '/dashboardapi/v1/users/:user_id/school_name', to: 'api/v1/users#get_school_name'
   post '/dashboardapi/v1/users/accept_data_transfer_agreement', to: 'api/v1/users#accept_data_transfer_agreement'
   get '/dashboardapi/v1/school-districts/:state', to: 'api/v1/school_districts#index', defaults: {format: 'json'}
   get '/dashboardapi/v1/schools/:school_district_id/:school_type', to: 'api/v1/schools#index', defaults: {format: 'json'}
