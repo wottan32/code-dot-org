@@ -119,4 +119,23 @@ class Api::V1::UsersControllerTest < ActionController::TestCase
     test_user.reload
     assert_equal response["next_census_display"], test_user.next_census_display
   end
+
+  # test 'responds to success' do
+  #   get "/api/v1/users/#{@user.id}/school_name"
+  #   assert_response :success
+  # end
+
+  test "a get request to get_school_name returns school object" do
+    sign_in(@user)
+    get :get_school_name, params: {user_id: 'me'}
+    assert_response :success
+    response = JSON.parse(@response.body)
+    assert_equal @user.school, response["school_name"]
+  end
+
+  test "responds to success" do
+    sign_in(@user)
+    get "/api/v1/users/#{@user.id}/school_name"
+    assert_response :success
+  end
 end
