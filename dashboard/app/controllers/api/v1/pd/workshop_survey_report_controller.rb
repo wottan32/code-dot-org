@@ -107,9 +107,10 @@ module Api::V1::Pd
     # GET /api/v1/pd/workshops/:id/local_workshop_daily_survey_report
     def local_workshop_daily_survey_report
       unless @workshop.local_summer? || @workshop.teachercon? ||
-        ([COURSE_CSP, COURSE_CSD].include?(@workshop.course) && @workshop.workshop_starting_date > Date.new(2018, 8, 1))
+        ([COURSE_CSP, COURSE_CSD].include?(@workshop.course) && @workshop.workshop_starting_date > Date.new(2018, 8, 1)) ||
+        (@workshop.csf? && @workshop.subject == SUBJECT_CSF_201)
         return render status: :bad_request, json: {
-          error: 'Only call this route for new academic year workshops, 5 day summer workshops, local or TeacherCon'
+          error: 'Only call this route for new academic year workshops, 5 day summer workshops, local or TeacherCon, and CSF 201'
         }
       end
 

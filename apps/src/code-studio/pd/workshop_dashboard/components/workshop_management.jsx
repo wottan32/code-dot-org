@@ -37,14 +37,25 @@ export class WorkshopManagement extends React.Component {
     if (props.showSurveyUrl) {
       let surveyBaseUrl;
 
-      if (
-        ([WorkshopTypes.local_summer, WorkshopTypes.teachercon].includes(
+      let isSelectedLocalSummerTeacherCon =
+        [WorkshopTypes.local_summer, WorkshopTypes.teachercon].includes(
           props.subject
-        ) &&
-          new Date(this.props.date).getFullYear() >= 2018) ||
-        (['CS Discoveries', 'CS Principles'].includes(props.course) &&
-          props.subject !== 'Code.org Facilitator Weekend' &&
-          new Date(this.props.date) >= new Date('2018-08-01'))
+        ) && new Date(this.props.date).getFullYear() >= 2018;
+
+      let isSelectedCSDCSP =
+        ['CS Discoveries', 'CS Principles'].includes(props.course) &&
+        props.subject !== 'Code.org Facilitator Weekend' &&
+        new Date(this.props.date) >= new Date('2018-08-01');
+
+      let isPilotCSF201 =
+        props.course === 'CS Fundamentals' &&
+        props.subject === 'Deep Dive' &&
+        new Date(this.props.date) >= new Date('2019-01-25'); //TODO: change to 05-25
+
+      if (
+        isSelectedLocalSummerTeacherCon ||
+        isSelectedCSDCSP ||
+        isPilotCSF201
       ) {
         surveyBaseUrl = 'daily_survey_results';
       } else if (props.subject === WorkshopTypes.local_summer) {
