@@ -120,12 +120,7 @@ class Api::V1::UsersControllerTest < ActionController::TestCase
     assert_equal response["next_census_display"], test_user.next_census_display
   end
 
-  # test 'responds to success' do
-  #   get "/api/v1/users/#{@user.id}/school_name"
-  #   assert_response :success
-  # end
-
-  test "a get request to get_school_name returns school object" do
+  test "a get request to get school_name returns school object" do
     sign_in(@user)
     get :get_school_name, params: {user_id: 'me'}
     assert_response :success
@@ -133,9 +128,22 @@ class Api::V1::UsersControllerTest < ActionController::TestCase
     assert_equal @user.school, response["school_name"]
   end
 
-  test "responds to success" do
+  # negative for if the user isn't signed in
+  test "school name is not returned for a user that is not signed in" do
+    get :get_school_name, params: {user_id: 234}
+    assert_response 403
+  end
+
+  #test what happens when a signed in user tries to access another user's acct (return 403)
+  test 'get school name will 403 if given a user id other than the person logged in' do
     sign_in(@user)
-    get "users/#{@user.id}/school_name"
-    assert_response :success
+    get :get_school_name, params: {user_id: '456'}
+    assert_response 403
+  end
+
+  # test if user id doesn't exist
+  test "get_school_user will 403 if user id does not exist" do
+    get :get_school_name
+    assert_response 403
   end
 end
