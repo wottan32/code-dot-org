@@ -135,7 +135,7 @@ class Api::V1::UsersControllerTest < ActionController::TestCase
 
   test "responds to success" do
     sign_in(@user)
-    get "/api/v1/users/#{@user.id}/school_name"
+    get "users/#{@user.id}/school_name"
     assert_response :success
   end
 end
