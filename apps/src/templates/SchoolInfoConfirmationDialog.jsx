@@ -50,7 +50,7 @@ class SchoolInfoConfirmationDialog extends Component {
   componentDidMount() {
     const {schoolName} = this.state;
     if (!schoolName && schoolName.length > 0) {
-      fetch('/dashboardapi/v1/users/me/school_name')
+      fetch('/api/v1/users/me/school_name')
         .then(response => response.json())
         .then(data => {
           this.setState({
@@ -63,23 +63,30 @@ class SchoolInfoConfirmationDialog extends Component {
 
   handleClickYes = () => {
     fetch(
-      `/dashboardapi/v1/user_school_infos/${
+      `/api/v1/update_last_confirmation_date/${
         this.props.scriptData.existingSchoolInfo.id
-      }`
+      }`,
+      {method: 'PATCH'}
     )
       .then(() => this.props.onClose())
       .catch(error => this.setState({error}));
   };
 
   handleClickUpdate = () => {
-    this.setState({showSchoolInterstitial: true});
+    fetch(
+      `/api/v1/user_school_infos/${
+        this.props.scriptData.existingSchoolInfo.id
+      }/update_end_date_last_seen_school_info_interstitial`,
+      {method: 'PATCH'}
+    )
+      .then(() => this.setState({showSchoolInterstitial: true}))
+      .catch(() => {});
   };
 
   handleClickSave = () => {
-    fetch('/dashboardapi/v1/users/me/update_user_info', {
+    fetch('/api/v1/users/me/update_user_info', {
       method: 'PUT'
-    }).then(() => {
-      fetch('/dashboardapi/v1/user_school_infos/me').then(
+    }).then(
         () => this.props.onClose
       );
     });
@@ -111,13 +118,11 @@ class SchoolInfoConfirmationDialog extends Component {
     return (
       <Body>
         <SchoolInfoInterstitial
-          scriptData={{
-            formUrl: '',
-            authTokenName: 'auth_token',
-            authTokenValue: 'fake_auth_token',
-            existingSchoolInfo: {}
+          scriptData={this.props.scriptData}
+          onClose={() => {
+            this.handleClickSave();
+            this.setState({isOpen: false});
           }}
-          onClose={() => this.setState({isOpen: false})}
         />
       </Body>
     );

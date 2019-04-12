@@ -749,6 +749,11 @@ FactoryGirl.define do
     script
   end
 
+  factory :user_school_info do
+    user {create :teacher}
+    school_info
+  end
+
   factory :peer_review do
     submitter {create :teacher}
     from_instructor false

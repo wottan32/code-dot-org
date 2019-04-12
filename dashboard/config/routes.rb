@@ -13,6 +13,8 @@ Dashboard::Application.routes.draw do
 
   patch '/api/v1/user_scripts/:script_id', to: 'api/v1/user_scripts#update'
 
+  patch '/api/v1/user_school_infos/:id/update_last_confirmation_date', to: 'user_school_infos#update_last_confirmation_date'
+
   get '/download/:product', to: 'hoc_download#index'
 
   get '/terms-and-privacy', to: 'home#terms_and_privacy'
@@ -580,6 +582,8 @@ Dashboard::Application.routes.draw do
     end
   end
 
+  get 'users/:user_id/school_name', to: 'users#get_school_name'
+
   namespace :api do
     namespace :v1 do
       concerns :api_v1_pd_routes
@@ -587,7 +591,6 @@ Dashboard::Application.routes.draw do
       post 'users/:user_id/using_text_mode', to: 'users#post_using_text_mode'
       get 'users/:user_id/using_text_mode', to: 'users#get_using_text_mode'
       get 'users/:user_id/contact_details', to: 'users#get_contact_details'
-      get 'users/:user_id/school_name', to: 'users#get_school_name'
 
       post 'users/:user_id/post_ui_tip_dismissed', to: 'users#post_ui_tip_dismissed'
 
@@ -612,8 +615,8 @@ Dashboard::Application.routes.draw do
       # Routes used by the peer reviews admin pages
       get 'peer_review_submissions/index', to: 'peer_review_submissions#index'
       get 'peer_review_submissions/report_csv', to: 'peer_review_submissions#report_csv'
-
-      patch 'user_school_infos/:id/update_last_confirmation_date', to: 'user_school_infos#update_last_confirmation_date'
+      #
+      # patch 'user_school_infos/:id/update_last_confirmation_date', to: 'user_school_infos#update_last_confirmation_date'
 
       patch 'user_school_infos/:id/update_end_date_last_seen_school_info_interstitial', to: 'user_school_infos#update_end_date_last_seen_school_info_interstitial'
 
