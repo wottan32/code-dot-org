@@ -141,9 +141,10 @@ class Api::V1::UsersControllerTest < ActionController::TestCase
     assert_response 403
   end
 
-  # test if user id doesn't exist
+  # test if user id doesn't exist - test failing on route not found
   test "get_school_user will 403 if user id does not exist" do
-    get :get_school_name
+    sign_in(@user)
+    get :get_school_name, params: {user_id: '-1'}
     assert_response 403
   end
 end

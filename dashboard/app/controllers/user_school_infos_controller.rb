@@ -22,18 +22,4 @@ class UserSchoolInfosController < ApplicationController
 
     head :no_content
   end
-
-  def update_school_info_id
-    # user.user_school_infos.where(school_info_id: user.school_info_id).first_or_create!(
-
-    user_school_info = UserSchoolInfo.find_or_create_by!(user: current_user, school_info_id: params[:id])
-
-
-
-    user_school_info = UserSchoolInfo.find(params[:id])
-
-    user_school_info.update(school_info_id: )
-
-    current_user.update(school_info_id: )
-  end
 end

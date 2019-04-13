@@ -751,7 +751,9 @@ FactoryGirl.define do
 
   factory :user_school_info do
     user {create :teacher}
-    school_info
+    start_date DateTime.now
+    last_confirmation_date DateTime.now
+    association :school_info
   end
 
   factory :peer_review do
