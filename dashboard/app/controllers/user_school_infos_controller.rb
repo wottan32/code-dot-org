@@ -31,6 +31,7 @@ class UserSchoolInfosController < ApplicationController
   end
 
   # note name of method used in component
+  # PATCH /api/v1/users_school_infos/<id>/update_school_info_id
   def update_school_info_id
     user.user_school_infos.where(school_info_id: user.school_info_id).first_or_create!(
         start_date: user.created_at,

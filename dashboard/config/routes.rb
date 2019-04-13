@@ -15,6 +15,8 @@ Dashboard::Application.routes.draw do
 
   patch '/api/v1/user_school_infos/:id/update_last_confirmation_date', to: 'user_school_infos#update_last_confirmation_date'
 
+  patch '/api/v1/users_school_infos/:id/update_school_info_id', to: 'user_school_infos#update_school_info_id'
+
   get '/download/:product', to: 'hoc_download#index'
 
   get '/terms-and-privacy', to: 'home#terms_and_privacy'
