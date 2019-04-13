@@ -32,7 +32,27 @@ class UserSchoolInfosController < ApplicationController
 
   # note name of method used in component
   # PATCH /api/v1/users_school_infos/<id>/update_school_info_id
-  def update_school_info_id
+  def update_school_info_history
+
+    ActiveRecord::Base.transaction do
+      if params[:add_new_school] == 1
+        school = School.create(new_school_params)
+        school.school_infos.create(school_info_params)
+      else
+        school = School.find(params[:school_id])
+      end
+
+      school_info = school.school_infos.order(created_at: :desc).first
+
+      # ALWAYS create a new user_schoo_info row
+      current_user.user_school_infos.create(user_school_info_params)
+
+      # Update the user(current_user) with the school_info_id
+      current_user.update school_info_id: school_info.id
+    end
+
+
+    ###################
     user.user_school_infos.where(school_info_id: user.school_info_id).first_or_create!(
         start_date: user.created_at,
         last_confirmation_date: user.last_seen_school_info_interstitial.nil? ? user.created_at : user.last_seen_school_info_interstitial
@@ -41,6 +61,12 @@ class UserSchoolInfosController < ApplicationController
     user_school_info.update(school_info_id: )
 
     current_user.update(school_info_id: )
+  end
+
+  private
+
+  def new_school_params
+    params.require(:)
   end
 
 end

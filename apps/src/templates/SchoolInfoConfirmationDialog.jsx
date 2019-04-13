@@ -82,10 +82,10 @@ class SchoolInfoConfirmationDialog extends Component {
       .then(() => this.setState({showSchoolInterstitial: true}))
       .catch(() => {});
   };
-
+// don't forget to include all fields as part of request
   handleClickSave = () => {
     fetch('/api/v1/users/me/update_user_info', {
-      method: 'PUT'
+      method: 'PATCH'
     }).then(
         () => this.props.onClose
       );
