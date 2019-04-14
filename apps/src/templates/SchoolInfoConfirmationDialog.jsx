@@ -40,16 +40,8 @@ class SchoolInfoConfirmationDialog extends Component {
     };
   }
 
-  static defaultProps = {
-    schoolName: '',
-    scriptData: {},
-    onClose: () => {},
-    isOpen: true
-  };
-
   componentDidMount() {
     const {schoolName} = this.state;
-    if (!schoolName && schoolName.length > 0) {
       fetch('/api/v1/users/me/school_name')
         .then(response => response.json())
         .then(data => {
@@ -58,7 +50,6 @@ class SchoolInfoConfirmationDialog extends Component {
           });
         })
         .catch(error => this.setState({error}));
-    }
   }
 
   handleClickYes = () => {
@@ -84,12 +75,16 @@ class SchoolInfoConfirmationDialog extends Component {
   };
 // don't forget to include all fields as part of request
   handleClickSave = () => {
-    fetch('/api/v1/users/me/update_user_info', {
-      method: 'PATCH'
-    }).then(
-        () => this.props.onClose
-      );
-    });
+    // have an if/else to create or update
+    // does school_id exist?
+    // update - patch
+    //else
+    //create - all fields
+    fetch('/api/v1/users/me/update_user_info',
+    {
+      method: 'POST'
+    })
+    .then(() => this.props.onClose);
   };
 
   renderInitialContent = () => {
