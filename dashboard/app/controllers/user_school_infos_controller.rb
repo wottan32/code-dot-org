@@ -31,7 +31,7 @@ class UserSchoolInfosController < ApplicationController
   end
 
   # note name of method used in component
-  # PATCH /api/v1/users_school_infos/<id>/update_school_info_id
+  # POST /api/v1/users_school_infos/<id>/update_school_info_id
   def update_school_info_history
 
     ActiveRecord::Base.transaction do
