@@ -19,7 +19,10 @@ const styles = {
     fontSize: 12,
     marginLeft: 10,
     color: color.black,
-    fontFamily: '"Gotham 5r", sans-serif'
+    fontFamily: '"Gotham 5r", sans-serif',
+    // Don't show default summary tag outline and background on hover or focus
+    outline: 'none',
+    background: 'none'
   },
   performanceLevelHeader: {
     display: 'flex',
@@ -27,9 +30,10 @@ const styles = {
     flexDirection: 'row',
     margin: '0px 8px',
     padding: 4,
+    borderRadius: 4,
+    border: `solid 1px ${color.white}`,
     ':hover': {
-      border: `solid 1px ${color.light_cyan}`,
-      borderRadius: 4
+      border: `solid 1px ${color.light_cyan}`
     }
   },
   performanceLevelHeaderSelected: {
@@ -40,9 +44,9 @@ const styles = {
     padding: 4,
     backgroundColor: color.lightest_cyan,
     borderRadius: 4,
+    border: `solid 1px ${color.white}`,
     ':hover': {
-      border: `solid 1px ${color.light_cyan}`,
-      borderRadius: 4
+      border: `solid 1px ${color.light_cyan}`
     }
   },
   tooltip: {
