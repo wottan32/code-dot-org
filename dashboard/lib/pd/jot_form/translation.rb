@@ -148,6 +148,8 @@ module Pd
         # Answer json is in the form:
         #   question_id => {name, text, type, answer, ...}
         #   All we care about here is the answer.
+
+        # TODO: we may want to preserve question name, type & text, scaleAmount, options
         answers = included_answers.map do |question_id, answer_data|
           [
             question_id.to_i,
