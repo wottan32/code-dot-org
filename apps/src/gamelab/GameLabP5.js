@@ -112,23 +112,6 @@ GameLabP5.prototype.init = function(options) {
     }
   };
 
-  window.p5.prototype.setBackground = function(color) {
-    this.World.background_color = color;
-  };
-
-  window.p5.prototype.showTitleScreen = function(titleArg, subTitleArg) {
-    this.World.title = titleArg;
-    this.World.subTitle = subTitleArg;
-  };
-
-  window.p5.prototype.hideTitleScreen = function() {
-    this.World.title = this.World.subTitle = '';
-  };
-
-  window.p5.prototype.shouldUpdate = function() {
-    return this.World.frameCount > 1;
-  };
-
   // Create 2nd phase function afterUserDraw()
   window.p5.prototype.afterUserDraw = function() {
     /*

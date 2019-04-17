@@ -26,6 +26,7 @@ var GameLabP5 = require('./GameLabP5');
 var gameLabSprite = require('./GameLabSprite');
 var gameLabGroup = require('./GameLabGroup');
 var gamelabCommands = require('./commands');
+var SpriteLab = require('./SpriteLab');
 import {initializeSubmitHelper, onSubmitComplete} from '../submitHelper';
 var dom = require('../dom');
 import {initFirebaseStorage} from '../storage/firebaseStorage';
@@ -115,6 +116,7 @@ var GameLab = function() {
   this.drawInProgress = false;
   this.setupInProgress = false;
   this.reportPreloadEventHandlerComplete_ = null;
+  this.spritelab = new SpriteLab();
   this.gameLabP5 = new GameLabP5();
   this.apiJS = apiJavascript;
   this.apiJS.injectGameLab(this);
@@ -250,6 +252,7 @@ GameLab.prototype.init = function(config) {
     onSetup: this.onP5Setup.bind(this),
     onDraw: this.onP5Draw.bind(this)
   });
+  this.spritelab.init();
 
   config.afterClearPuzzle = function() {
     getStore().dispatch(setInitialAnimationList(this.startAnimations));
