@@ -23,4 +23,8 @@ SpriteLab.prototype.init = function() {
   window.p5.prototype.shouldUpdate = function() {
     return this.World.frameCount > 1;
   };
+
+  window.p5.prototype.drawNative = function() {
+    console.log('draw native!');
+  };
 };
