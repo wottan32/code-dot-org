@@ -104,6 +104,19 @@ module Api::V1::Pd
       end
     end
 
+    # TODO: create a completely separate route for csf workshop
+    def csf_201_workshop_survey_report
+      # generate summary
+      # return summary to client as json
+      #   course_name
+      #   this_workshop:{survey_name: {response_count, general: {question_name: answer_histogram}}}
+      #   questions: {survey_name: {general: {q_name: q_content}}}
+      #   all_my_workshop: nil
+      #   facilitators: nil
+      #   facilitator_averages: nil
+      #   facilitator_response_counts: nil
+    end
+
     # GET /api/v1/pd/workshops/:id/local_workshop_daily_survey_report
     def local_workshop_daily_survey_report
       unless @workshop.local_summer? || @workshop.teachercon? ||

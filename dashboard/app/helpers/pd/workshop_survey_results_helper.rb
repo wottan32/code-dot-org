@@ -348,6 +348,7 @@ module Pd::WorkshopSurveyResultsHelper
   end
 
   def get_questions_for_forms(workshop)
+    # TODO: special case for CSF
     questions = workshop.summer? ? {
       'Pre Workshop' => {
         general: get_summary_for_form(
