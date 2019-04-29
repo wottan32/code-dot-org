@@ -13,10 +13,17 @@ import * as utils from '../../utils';
 import * as elementUtils from './elementUtils';
 import EnumPropertyRow from './EnumPropertyRow';
 import designMode from '../designMode';
-import {defaultFontSizeStyle, fontFamilyStyles} from '../constants';
+import {
+  defaultFontSizeStyle,
+  fontFamilyStyles,
+  themeOptions,
+  CLASSIC_THEME_INDEX
+} from '../constants';
 import themeColor from '../themeColor';
 import elementLibrary from './library';
 import experiments from '../../util/experiments';
+
+const DEFAULT_TEXT_AREA_PADDING = '5px 5px 5px 15px';
 
 class TextAreaProperties extends React.Component {
   static propTypes = {
@@ -281,6 +288,7 @@ export default {
     element.style.height = '100px';
     if (experiments.isEnabled('applabThemes')) {
       element.style.borderStyle = 'solid';
+      element.style.padding = DEFAULT_TEXT_AREA_PADDING;
       elementLibrary.applyCurrentTheme(element, designMode.activeScreen());
     } else {
       element.style.fontFamily = fontFamilyStyles[0];
@@ -321,6 +329,18 @@ export default {
         e.preventDefault();
       }
     });
+  },
+
+  beforePropertyChange: function(element, name, prevThemeValue, batchChangeId) {
+    if (
+      prevThemeValue === themeOptions[CLASSIC_THEME_INDEX] &&
+      element.style.padding === ''
+    ) {
+      // An older project that didn't set padding is attempting to change away from
+      // the classic theme. Apply our new default padding inline style.
+      element.style.padding = DEFAULT_TEXT_AREA_PADDING;
+    }
+    return null;
   },
 
   onPropertyChange: function(element, name, value) {
