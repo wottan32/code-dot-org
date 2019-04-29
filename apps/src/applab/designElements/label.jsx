@@ -270,6 +270,22 @@ export default {
       millennial: 13,
       robot: 13,
       classic: 14
+    },
+    horizontalPadding: {
+      default: 0,
+      orange: 8,
+      citrus: 8,
+      ketchupAndMustard: 8,
+      lemonade: 0,
+      forest: 0,
+      watermelon: 8,
+      area51: 8,
+      polar: 8,
+      glowInTheDark: 8,
+      bubblegum: 8,
+      millennial: 8,
+      robot: 8,
+      classic: 0
     }
   },
 
@@ -284,6 +300,7 @@ export default {
     element.style.maxWidth = applabConstants.APP_WIDTH + 'px';
     if (experiments.isEnabled('applabThemes')) {
       element.style.borderStyle = 'solid';
+      element.style.textAlign = 'center';
       elementLibrary.applyCurrentTheme(element, designMode.activeScreen());
     } else {
       element.style.backgroundColor = themeColor.labelBackground.classic;
@@ -319,7 +336,7 @@ export default {
    * @returns {{width: number, height: number}} Size that this element should be if it were fitted exactly. If there is
    * no text, then the best size is 15 x 15 so that the user has something to drag around.
    */
-  getBestSize: function(element) {
+  getBestSize: function(element, prevThemeValue) {
     // Start by assuming best fit is current size
     const size = this.getCurrentSize(element);
 
@@ -327,6 +344,13 @@ export default {
       $(element).data('lock-width') === PropertyRow.LockState.LOCKED;
     const heightLocked =
       $(element).data('lock-height') === PropertyRow.LockState.LOCKED;
+
+    // If prevThemeValue is supplied, we're trying to compute the "before" size
+    // and so we should use that theme (vs. the one that we are switching to)
+    const themeValue =
+      prevThemeValue ||
+      elementLibrary.getCurrentTheme(designMode.activeScreen());
+    const horizontalPadding = this.themeValues.horizontalPadding[themeValue];
 
     // Change the size to fit the text.
     if (element.textContent) {
@@ -358,7 +382,10 @@ export default {
 
       if (!widthLocked) {
         // Truncate the width before it runs off the edge of the screen
-        size.width = Math.min(clone.width() + 1 + 2 * padding, maxWidth);
+        size.width = Math.min(
+          clone.width() + 1 + 2 * padding + 2 * horizontalPadding,
+          maxWidth
+        );
       }
       if (!heightLocked) {
         size.height = clone.height() + 1 + 2 * padding;
@@ -377,19 +404,19 @@ export default {
 
     // For center or right alignment, we should adjust the left side to effectively retain that alignment.
     if (
-      element.style.textAlign === 'center' ||
+      // element.style.textAlign === 'center' ||
       element.style.textAlign === 'right'
     ) {
       let left = parseInt(element.style.left, 10);
       const width = parseInt(element.style.width, 10);
       // Positive delta means that it is getting wider
       const delta = size.width - width;
-      if (element.style.textAlign === 'right') {
-        left -= delta;
-      } else {
-        // must be centered
-        left -= delta / 2;
-      }
+      // if (element.style.textAlign === 'right') {
+      left -= delta;
+      // } else {
+      //   // must be centered
+      //   left -= delta / 2;
+      // }
       // Don't move text past the left side.
       element.style.left = Math.max(0, left) + 'px';
       if (gridUtils.isDraggableContainer(element.parentNode)) {
@@ -400,19 +427,51 @@ export default {
     element.style.height = size.height + 'px';
   },
 
+  _lastFitsExactly: {},
+
   /**
    * Returns whether this element perfectly fits its bounding size, if that is needed in onPropertyChange.
    */
-  beforePropertyChange: function(element, name) {
-    if (name !== 'text' && name !== 'fontSize') {
-      return null;
+  beforePropertyChange: function(element, name, prevThemeValue, batchChangeId) {
+    switch (name) {
+      case 'horizontalPadding':
+        if (
+          prevThemeValue ===
+            applabConstants.themeOptions[applabConstants.CLASSIC_THEME_INDEX] &&
+          element.style.textAlign === ''
+        ) {
+          // An older project that didn't set textAlign is attempting to change away from
+          // the classic theme. Apply 'center' textAlign to make this label the same as a new label.
+          element.style.textAlign = 'center';
+        }
+      // Fall through...
+      case 'text':
+      case 'fontFamily':
+      case 'fontSize': {
+        const {
+          batchId = -1,
+          previouslyFitExactly: batchPreviouslyFitExactly
+        } = this._lastFitsExactly;
+        if (batchId === batchChangeId) {
+          // We've already computed previouslyFitExactly for this batch of property updates:
+          return batchPreviouslyFitExactly;
+        }
+        const currentSize = this.getCurrentSize(element);
+        const bestSize = this.getBestSize(element, prevThemeValue);
+        const previouslyFitExactly =
+          Math.abs(currentSize.width - bestSize.width) < STILL_FITS &&
+          Math.abs(currentSize.height - bestSize.height) < STILL_FITS;
+        this._lastFitsExactly = batchChangeId
+          ? {
+              batchId: batchChangeId,
+              previouslyFitExactly
+            }
+          : {};
+        return previouslyFitExactly;
+      }
+      default:
+        return null;
     }
-    const currentSize = this.getCurrentSize(element);
-    const bestSize = this.getBestSize(element);
-    return (
-      Math.abs(currentSize.width - bestSize.width) < STILL_FITS &&
-      Math.abs(currentSize.height - bestSize.height) < STILL_FITS
-    );
   },
 
   /**
@@ -421,7 +480,9 @@ export default {
   onPropertyChange: function(element, name, value, previouslyFitExactly) {
     switch (name) {
       case 'text':
+      case 'fontFamily':
       case 'fontSize':
+      case 'horizontalPadding':
         if (previouslyFitExactly) {
           this.resizeToFitText(element);
         }
